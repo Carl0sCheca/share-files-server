@@ -1,7 +1,9 @@
 use std::path::Path;
 
 use actix_web::{
-    get, middleware, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder,
+    get, middleware, post,
+    web::{self, Bytes},
+    App, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 
 use chrono::{DateTime, Local};
@@ -201,7 +203,11 @@ async fn main() -> std::io::Result<()> {
             .default_service(web::route().to(HttpResponse::NotFound))
             .service(
                 web::resource("/favicon.ico").route(web::route().to(|| async {
-                    Ok::<_, actix_web::Error>(actix_files::NamedFile::open("favicon.ico").unwrap())
+                    let bytes = include_bytes!("../favicon.ico");
+                    let data = Bytes::copy_from_slice(bytes);
+                    Ok::<_, actix_web::Error>(
+                        HttpResponse::Ok().content_type("image/x-icon").body(data),
+                    )
                 })),
             )
             .service(upload)
