@@ -54,8 +54,10 @@ async fn upload(req: HttpRequest, payload: actix_web::web::Bytes) -> impl Respon
         hasher.update(timestamp_str.as_bytes());
         let result: String = hasher.digest().to_string();
 
-        let filename = format!("{result}.{format}");
-        filename
+        match format {
+            x if x.is_empty() => result,
+            format => format!("{result}.{format}"),
+        }
     };
 
     let provider = minio_provider();
